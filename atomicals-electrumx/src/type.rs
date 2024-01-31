@@ -52,11 +52,11 @@ pub struct Ft {
 	#[serde(rename = "$max_mints")]
 	pub max_mints: u64,
 	#[serde(rename = "$max_supply")]
-	pub max_supply: u64,
+	pub max_supply: i64,
 	#[serde(rename = "$mint_amount")]
 	pub mint_amount: u64,
 	#[serde(rename = "$mint_bitworkc")]
-	pub mint_bitworkc: String,
+	pub mint_bitworkc: Option<String>,
 	#[serde(rename = "$mint_bitworkr")]
 	pub mint_bitworkr: Option<String>,
 	#[serde(rename = "$mint_height")]
@@ -69,6 +69,8 @@ pub struct Ft {
 	pub ticker: String,
 	#[serde(rename = "$ticker_candidates")]
 	pub ticker_candidates: Vec<TickerCandidate>,
+	#[serde(rename = "$mint_mode")]
+	pub is_infinite_mode: String,
 	pub atomical_id: String,
 	pub atomical_number: u64,
 	pub atomical_ref: String,
@@ -102,6 +104,12 @@ pub struct TickerCandidate {
 #[derive(Debug, Deserialize)]
 pub struct DftInfo {
 	pub mint_count: u64,
+	pub mint_bitworkc_current: Option<String>,
+	pub mint_bitworkc_next: Option<String>,
+	pub mint_bitworkc_next_next: Option<String>,
+	pub mint_bitworkr_current: Option<String>,
+	pub mint_bitworkr_next: Option<String>,
+	pub mint_bitworkr_next_next: Option<String>
 }
 #[derive(Debug, Deserialize)]
 pub struct LocationSummary {
@@ -123,7 +131,7 @@ pub struct Args {
 	pub bitworkr: Option<String>,
 	pub max_mints: u64,
 	pub mint_amount: u64,
-	pub mint_bitworkc: String,
+	pub mint_bitworkc: Option<String>,
 	pub mint_bitworkr: Option<String>,
 	pub mint_height: u64,
 	// TODO: It's a `String` in mainnet but a `u64` in testnet.
@@ -146,7 +154,7 @@ pub struct MintInfo {
 	#[serde(rename = "$bitwork")]
 	pub bitwork: Bitwork,
 	#[serde(rename = "$mint_bitworkc")]
-	pub mint_bitworkc: String,
+	pub mint_bitworkc: Option<String>,
 	#[serde(rename = "$mint_bitworkr")]
 	pub mint_bitworkr: Option<String>,
 	#[serde(rename = "$request_ticker")]

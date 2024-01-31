@@ -29,6 +29,7 @@ use std::{future::Future, str::FromStr, time::Duration};
 use bitcoin::{Address, Amount, Network};
 use reqwest::{Client as ReqwestClient, ClientBuilder as ReqwestClientBuilder};
 use serde::{de::DeserializeOwned, Serialize};
+use serde_json::json;
 use tokio::time;
 
 /// Necessary configurations of the client to transform it into an API client.
@@ -222,7 +223,7 @@ impl Http for ElectrumX {
 		let u = uri.as_ref();
 
 		for _ in self.max_retries.clone() {
-			match self.client.post(u).json(&params).send().await {
+			match self.client.post(u).json(&json!({"params": &params})).send().await {
 				Ok(r) => match r.json().await {
 					Ok(r) => return Ok(r),
 					Err(e) => {

@@ -257,6 +257,7 @@ impl Miner {
 		let response = self.api.get_ft_info(id).await?;
 		let global = response.global.unwrap();
 		let ft = response.result;
+		let is_infinite_mode = ft.is_infinite_mode == "perpetual";
 
 		if ft.ticker != self.ticker {
 			Err(anyhow::anyhow!("ticker mismatch"))?;
@@ -270,9 +271,13 @@ impl Miner {
 		if ft.mint_amount == 0 || ft.mint_amount >= 100_000_000 {
 			Err(anyhow::anyhow!("mint amount mismatch"))?;
 		}
-		if ft.dft_info.mint_count >= ft.max_mints {
-			Err(anyhow::anyhow!("max mints reached"))?;
-		}
+        if is_infinite_mode {
+            tracing::info!("Infinite minting mode detected, there is no limit");
+        } else {
+            if ft.dft_info.mint_count >= ft.max_mints {
+                Err(anyhow::anyhow!("max mints reached"))?;
+            }
+        }
 
 		let secp = Secp256k1::new();
 		let satsbyte = if self.network == Network::Bitcoin {
@@ -284,12 +289,23 @@ impl Miner {
 			value: Amount::from_sat(ft.mint_amount),
 			script_pubkey: wallet.stash.address.script_pubkey(),
 		}];
+
+		let mint_bitworkc: String;
+		let mint_bitworkr: String;
+		if is_infinite_mode {
+			mint_bitworkc = ft.dft_info.mint_bitworkc_current.clone().unwrap();
+			mint_bitworkr = ft.dft_info.mint_bitworkr_current.clone().unwrap();
+		} else {
+			mint_bitworkc = ft.mint_bitworkc.clone().unwrap();
+			mint_bitworkr = ft.mint_bitworkr.clone().unwrap();
+		}
+
 		let payload = PayloadWrapper {
 			args: {
 				let (time, nonce) = util::time_nonce();
 
 				Payload {
-					bitworkc: ft.mint_bitworkc.clone(),
+					bitworkc: mint_bitworkc.clone(),
 					mint_ticker: ft.ticker.clone(),
 					nonce,
 					time,
@@ -318,8 +334,8 @@ impl Miner {
 		Ok(Data {
 			secp,
 			satsbyte,
-			bitworkc: ft.mint_bitworkc,
-			bitworkr: ft.mint_bitworkr,
+			bitworkc: mint_bitworkc,
+			bitworkr: Some(mint_bitworkr),
 			additional_outputs,
 			reveal_script,
 			reveal_spend_info,
