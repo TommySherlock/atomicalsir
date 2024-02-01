@@ -291,14 +291,9 @@ impl Miner {
 		}];
 
 		let mint_bitworkc: String;
-		let mint_bitworkr: String;
-		if is_infinite_mode {
-			mint_bitworkc = ft.dft_info.mint_bitworkc_current.clone().unwrap();
-			mint_bitworkr = ft.dft_info.mint_bitworkr_current.clone().unwrap();
-		} else {
-			mint_bitworkc = ft.mint_bitworkc.clone().unwrap();
-			mint_bitworkr = ft.mint_bitworkr.clone().unwrap();
-		}
+		let mint_bitworkr: Option<String>;
+		mint_bitworkc = ft.dft_info.mint_bitworkc_current.unwrap();
+		mint_bitworkr = ft.dft_info.mint_bitworkr_current;
 
 		let payload = PayloadWrapper {
 			args: {
@@ -335,7 +330,7 @@ impl Miner {
 			secp,
 			satsbyte,
 			bitworkc: mint_bitworkc,
-			bitworkr: Some(mint_bitworkr),
+			bitworkr: mint_bitworkr,
 			additional_outputs,
 			reveal_script,
 			reveal_spend_info,
